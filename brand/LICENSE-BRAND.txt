@@ -1,0 +1,9 @@
+Dune Client brand assets - Copyright (c) 2026 Dune Development. All rights reserved.
+
+The logos, emblem, icons, colours and background pictures in this repository (brand/, launcher/assets/brand/,
+packaging/icons/, crates/horizon-theme/icons/horizon-64.png) are NOT covered by the LGPL-3.0 licence of the
+launcher's source code. They may not be copied, redistributed or used to name or identify another product.
+The source pack published to satisfy the LGPL replaces them with neutral placeholders
+(scripts/make-source-pack.sh); a build made from that pack is not "Dune Client".
+
+Third party: the fonts Montserrat and Inter are under the SIL Open Font License 1.1 (crates/horizon-theme/fonts/OFL-*.txt).

@@ -1,0 +1,4 @@
+#!/bin/sh
+# fxc stand-in (see d3dc.c): GPUI_FXC_PATH points here inside the Windows build image.
+export WINEDLLOVERRIDES=d3dcompiler_47=n,b XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/tmp} WINEPREFIX=${WINEPREFIX:-/tmp/wineprefix} WINEDEBUG=-all WINEARCH=win64
+exec /usr/lib/wine/wine64 /usr/local/lib/d3dc.exe "$@"

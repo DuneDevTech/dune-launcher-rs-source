@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Dune Client
+GenericName=Game launcher
+Comment=Minecraft: Java Edition with the Dune Client mod
+Exec=dune-launcher
+Icon=dune-client
+Terminal=false
+Categories=Game;
+StartupWMClass=dune-launcher

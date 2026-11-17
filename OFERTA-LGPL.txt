@@ -1,0 +1,23 @@
+Dune Client launcher 0.3.2  (commit 1c0d058d4b36da69e5767080d590e630276bfa62)
+===========================================================
+
+This program is a modified version of the Horizon launcher
+(https://github.com/horizon-rust/horizon, (c) 2026 Ludovic Marie and the Horizon contributors) and is
+licensed under the GNU Lesser General Public License, version 3 or (at your option) any later version
+(see LICENSE and LICENSES/). Other components keep their own licences (THIRD_PARTY_NOTICES.md and
+third_party_licenses/). Our changes are described in NOTICE-DUNE.md.
+
+WRITTEN OFFER. Dune Development will give any person who received a copy of this program the complete
+corresponding source code of the exact version they received (this archive: dune-launcher-rs-0.3.2-source.tar.gz), together with the
+scripts to build and install it, for at least three years from the day of distribution and for as long as we
+distribute that version, at no charge beyond the cost of delivery. Ask at https://duneclient.com (contact
+page) naming the version and commit above.
+
+You may modify the program and replace it with your own build: follow docs/dune/COMPILAR.md. Nothing in the
+program or its updater prevents you from running a modified build (the update feed's signature check only
+decides which updates THIS build installs; a build you compile yourself can carry your own key in
+launcher/dune-update-key.pub).
+
+The Dune Client logo, icons and background are not part of the licensed source (brand/LICENSE-BRAND.txt):
+this archive contains neutral placeholders in their place. The mod (DuneClientMod), the store and the
+plugins are separate programs, are not part of this program and are not covered by this offer.
