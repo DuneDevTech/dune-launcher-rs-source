@@ -14,14 +14,15 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 /// Bumped when the spec changes; the Electron launcher only hands off to a binary that reports it.
-pub const PROTOCOL: u32 = 1;
+pub const PROTOCOL: u32 = 2;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Spec {
     pub protocol: u32,
     pub minecraft: String,
-    /// `dune`, `fabric` (Dune + Fabric) or `vanilla`.
+    /// `dune` (Dune Client; the player's own Fabric mods in the folder keep loading) or `fabric` (plain Fabric:
+    /// no Dune Client mod, the player's mods + Fabric API).
     pub mode: String,
     pub game_dir: PathBuf,
     pub minecraft_dir: PathBuf,
@@ -37,6 +38,9 @@ pub struct Spec {
     pub window: Option<(u32, u32)>,
     #[serde(default)]
     pub fullscreen: bool,
+    /// `fabric` mode: keep the newest stable Fabric API in the mods folder (default on).
+    #[serde(default = "yes")]
+    pub fabric_api: bool,
     #[serde(default)]
     pub server: Option<String>,
     /// Program and arguments to start once the game has ended (the Electron launcher uses it to come back
@@ -44,6 +48,10 @@ pub struct Spec {
     #[serde(default)]
     pub after_exit: Option<Vec<String>>,
     pub player: SpecPlayer,
+}
+
+fn yes() -> bool {
+    true
 }
 
 #[derive(Deserialize)]
@@ -62,6 +70,8 @@ pub struct Info {
     pub version: String,
     /// Minecraft versions with a Dune Client mod build this binary can install itself.
     pub dune_versions: Vec<String>,
+    /// Hand-off modes this binary starts.
+    pub modes: Vec<&'static str>,
 }
 
 pub fn info() -> Info {
@@ -69,6 +79,7 @@ pub fn info() -> Info {
         protocol: PROTOCOL,
         version: env!("CARGO_PKG_VERSION").to_string(),
         dune_versions: crate::dune::supported_versions().map(String::from).collect(),
+        modes: vec!["dune", "fabric"],
     }
 }
 
@@ -77,8 +88,8 @@ pub fn parse(json: &str) -> Result<Spec, String> {
     if spec.protocol != PROTOCOL {
         return Err(format!("hand-off protocol {} is not {PROTOCOL}", spec.protocol));
     }
-    if !matches!(spec.mode.as_str(), "dune" | "fabric" | "vanilla") {
-        return Err(format!("hand-off mode {:?} is not dune, fabric or vanilla", spec.mode));
+    if !matches!(spec.mode.as_str(), "dune" | "fabric") {
+        return Err(format!("hand-off mode {:?} is not dune or fabric", spec.mode));
     }
     if !spec.game_dir.is_absolute() || !spec.minecraft_dir.is_absolute() {
         return Err("hand-off folders must be absolute paths".into());
@@ -97,15 +108,11 @@ pub fn parse(json: &str) -> Result<Spec, String> {
 /// The instance the spec describes.
 pub fn instance(spec: &Spec) -> Result<Instance, String> {
     let dune_build = crate::dune::build_for(&spec.minecraft);
-    let (dune, dune_fabric, loader) = match spec.mode.as_str() {
-        "dune" | "fabric" if dune_build.is_none() => {
-            return Err(format!("Dune Client has no mod build for Minecraft {} in this launcher", spec.minecraft))
-        }
-        "dune" => (true, false, true),
-        "fabric" => (false, true, true),
-        _ => (false, false, false),
-    };
-    let loader = loader.then(|| Loader {
+    if spec.mode == "dune" && dune_build.is_none() {
+        return Err(format!("Dune Client has no mod build for Minecraft {} in this launcher", spec.minecraft));
+    }
+    let (dune, fabric_api) = (spec.mode == "dune", spec.mode == "fabric" && spec.fabric_api);
+    let loader = Some(Loader {
         kind: LoaderKind::Fabric,
         version: spec
             .loader_version
@@ -138,7 +145,8 @@ pub fn instance(spec: &Spec) -> Result<Instance, String> {
             loader,
             window: spec.window,
             dune,
-            dune_fabric,
+            dune_fabric: false,
+            fabric_api,
         }),
     })
 }
@@ -174,7 +182,7 @@ mod tests {
         let (game, mc) = if cfg!(windows) { ("C:\\g", "C:\\m") } else { ("/g", "/m") };
         let (game, mc) = (game.replace('\\', "\\\\"), mc.replace('\\', "\\\\"));
         format!(
-            r#"{{"protocol":1,"minecraft":"1.21.11","mode":"dune","gameDir":"{game}","minecraftDir":"{mc}",
+            r#"{{"protocol":2,"minecraft":"1.21.11","mode":"dune","gameDir":"{game}","minecraftDir":"{mc}",
                "player":{{"name":"Steve","uuid":"00000000-0000-0000-0000-000000000000","accessToken":"SECRETTOKEN123"}}{extra}}}"#
         )
     }
@@ -195,21 +203,30 @@ mod tests {
     fn rejects_unknown_fields_modes_protocols_and_relative_paths() {
         assert!(parse(&json(r#","extra":1"#)).is_err());
         assert!(parse(&json("").replace("\"dune\"", "\"hax\"")).is_err());
-        assert!(parse(&json("").replace("\"protocol\":1", "\"protocol\":9")).is_err());
+        assert!(parse(&json("").replace("\"protocol\":2", "\"protocol\":9")).is_err());
         assert!(parse(&json("").replace("\"gameDir\":\"", "\"gameDir\":\"rel")).is_err());
         assert!(parse(&json("").replace("SECRETTOKEN123", "")).is_err());
     }
 
     #[test]
-    fn fabric_mode_is_dune_fabric_and_vanilla_has_no_loader() {
-        let fabric = instance(&parse(&json("").replace("\"dune\"", "\"fabric\"")).unwrap()).unwrap();
-        assert!(fabric.java.as_ref().unwrap().dune_fabric);
-        let vanilla = instance(&parse(&json("").replace("\"dune\"", "\"vanilla\"")).unwrap()).unwrap();
-        assert!(vanilla.java.unwrap().loader.is_none());
+    fn fabric_mode_is_plain_fabric_with_fabric_api_and_no_dune_mod() {
+        let plain = |extra: &str, mc: &str| {
+            let spec = parse(&json(extra).replace("\"dune\"", "\"fabric\"").replace("1.21.11", mc)).unwrap();
+            instance(&spec)
+        };
+        let g = plain(r#","loaderVersion":"0.20.1""#, "1.21.11").unwrap().java.unwrap();
+        assert!(!g.dune && !g.dune_fabric && g.fabric_api);
+        assert_eq!(g.loader.unwrap().version, "0.20.1");
+        // any version works (no Dune build needed) as long as the loader version is given
+        assert!(plain(r#","loaderVersion":"0.16.0""#, "1.19.4").is_ok());
+        assert!(plain("", "1.19.4").is_err()); // no loader version to use
+        let off = plain(r#","loaderVersion":"0.20.1","fabricApi":false"#, "1.21.11").unwrap().java.unwrap();
+        assert!(!off.fabric_api && !off.dune);
+        assert!(parse(&json("").replace("\"dune\"", "\"vanilla\"")).is_err());
     }
 
     #[test]
-    fn a_version_without_a_dune_build_is_refused() {
+    fn dune_mode_needs_a_dune_build() {
         let spec = parse(&json("").replace("1.21.11", "1.8.9")).unwrap();
         assert!(instance(&spec).is_err());
     }
@@ -242,5 +259,6 @@ mod tests {
     #[test]
     fn info_lists_the_dune_versions() {
         assert!(info().dune_versions.iter().any(|v| v == "1.21.11"));
+        assert_eq!(info().modes, ["dune", "fabric"]);
     }
 }

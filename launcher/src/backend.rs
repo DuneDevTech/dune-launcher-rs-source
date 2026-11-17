@@ -2186,6 +2186,8 @@ pub fn java_game_for(
             log,
         )?;
         crate::dune::ensure_mod(&instance.home, &game.minecraft, &get_bytes, log)?;
+    } else if game.fabric_api && game.loader.is_some() {
+        crate::dune::ensure_fabric_api(&instance.home, &game.minecraft, &get_bytes, log)?;
     }
     let version =
         crate::java_launch::resolve(crate::java_launch::read(&file(&start)?)?, &minecraft)?;

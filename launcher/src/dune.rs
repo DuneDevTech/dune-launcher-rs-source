@@ -133,6 +133,7 @@ pub fn ensure_mod(
 pub const REQUIRED_MODS: [&str; 3] = ["fabric-api", "malilib", "litematica"];
 /// Added in the `Dune + Fabric` mode (a mods folder of the player's own, with Mod Menu).
 pub const MOD_MENU: &str = "modmenu";
+pub const FABRIC_API: &str = "fabric-api";
 
 /// The Minecraft versions Dune Client offers (the ones with a Dune Client mod build).
 pub fn supported_versions() -> impl Iterator<Item = &'static str> {
@@ -236,6 +237,27 @@ pub fn ensure_required_mods(
     fetch: &dyn Fn(&str) -> Result<Vec<u8>, String>,
     log: &dyn Fn(String),
 ) -> Result<(), String> {
+    let wanted: Vec<&str> = REQUIRED_MODS.iter().copied().chain(with_mod_menu.then_some(MOD_MENU)).collect();
+    ensure_mods(game_dir, minecraft, &wanted, fetch, log)
+}
+
+/// Plain Fabric mode: only the newest stable Fabric API (the player's own jars stay alone).
+pub fn ensure_fabric_api(
+    game_dir: &Path,
+    minecraft: &str,
+    fetch: &dyn Fn(&str) -> Result<Vec<u8>, String>,
+    log: &dyn Fn(String),
+) -> Result<(), String> {
+    ensure_mods(game_dir, minecraft, &[FABRIC_API], fetch, log)
+}
+
+fn ensure_mods(
+    game_dir: &Path,
+    minecraft: &str,
+    wanted: &[&str],
+    fetch: &dyn Fn(&str) -> Result<Vec<u8>, String>,
+    log: &dyn Fn(String),
+) -> Result<(), String> {
     let mods = game_dir.join("mods");
     std::fs::create_dir_all(&mods).map_err(|e| format!("{}: {e}", mods.display()))?;
     let lock = mods.join(".dune-managed.json");
@@ -243,12 +265,7 @@ pub fn ensure_required_mods(
         .ok()
         .and_then(|b| serde_json::from_slice(&b).ok())
         .unwrap_or_default();
-    let wanted: Vec<&str> = REQUIRED_MODS
-        .iter()
-        .copied()
-        .chain(with_mod_menu.then_some(MOD_MENU))
-        .collect();
-    for slug in wanted {
+    for &slug in wanted {
         match resolve(slug, minecraft, fetch) {
             Ok((name, url, sha)) => {
                 let target = mods.join(&name);

@@ -31,7 +31,7 @@ self-update, no built-in telemetry endpoint, no third-party sponsor banner, rebr
 ## Microsoft login
 
 Set the Azure public client id with `HORIZON_MSA_CLIENT_ID` (run time) or at build time:
-`HORIZON_MSA_CLIENT_ID=87f38142-0d4d-41cb-a3b2-11091a0bc497 cargo build --release`.
+`HORIZON_MSA_CLIENT_ID=2f1eb485-c280-475c-9448-83fbeb91870c cargo build --release`.
 Mojang must approve the app id (same gate as the Electron launcher, docs/MICROSOFT-LOGIN.md there).
 
 ## Dev/QA offline session

@@ -2,7 +2,7 @@
 
 - Flujo **device code** (sin secreto): Microsoft → Xbox Live → XSTS → servicios de Minecraft, y se
   comprueba que la cuenta posee Java Edition (`entitlements/mcstore`, Game Pass incluido).
-- **Client ID Azure propio**: `87f38142-0d4d-41cb-a3b2-11091a0bc497` (valor público, en
+- **Client ID Azure propio**: `2f1eb485-c280-475c-9448-83fbeb91870c` (valor público, en
   `launcher/src/account.rs::DUNE_CLIENT_ID`; `DUNE_MSA_CLIENT_ID` lo sustituye en ejecución o en
   compilación). La app Azure está en el tenant de Nebula/Dune: "Solo cuentas personales", sin URI de
   redirección, "Allow public client flows" activado.

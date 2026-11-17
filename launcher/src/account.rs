@@ -39,7 +39,7 @@ const RENEW_BEFORE: u64 = 3600;
 
 /// Dune Client's Azure application (client) ID. Public values, no secret: the device code flow
 /// needs none. Mojang's approval of this ID (https://aka.ms/mce-reviewappid) is pending.
-pub const DUNE_CLIENT_ID: &str = "87f38142-0d4d-41cb-a3b2-11091a0bc497";
+pub const DUNE_CLIENT_ID: &str = "2f1eb485-c280-475c-9448-83fbeb91870c";
 
 /// What the Minecraft services answer (403) while Mojang has not approved the app yet.
 pub const NOT_APPROVED: &str = "Mojang todavía no ha aprobado Dune Client para iniciar sesión con Microsoft (la solicitud está pendiente). Tu cuenta y tu contraseña están bien: hasta que llegue la aprobación no se puede iniciar sesión ni jugar con cuenta Microsoft.";

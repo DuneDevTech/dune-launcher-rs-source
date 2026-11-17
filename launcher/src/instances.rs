@@ -226,6 +226,10 @@ pub struct JavaGame {
     /// Dune Client + Fabric: the same mod, on a Fabric instance with the player's own mods.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub dune_fabric: bool,
+    /// Plain Fabric (Dune Client's `Fabric` mode): the launcher keeps the newest stable Fabric API in
+    /// this instance's `mods/` (the player's own mods stay) and never installs the Dune Client mod.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub fabric_api: bool,
 }
 
 impl JavaGame {
