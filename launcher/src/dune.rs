@@ -55,26 +55,26 @@ pub struct Build {
 pub const BUILDS: [Build; 4] = [
     Build {
         minecraft: "1.21.11",
-        file: "DuneClientMod-1.2.5-mc1.21.11.jar",
-        sha512: "b61650402086db76513341e9170e62fd406a5ea6395ae3cc22db1cb5377f7521b4a559393208f56198718fc25c0d6fa84f3d757820220357853da3cab275e6f9",
+        file: "DuneClientMod-1.2.6-mc1.21.11.jar",
+        sha512: "8c62e61cdded6e2bbb7f1742ea82a6b10e3461f9bc1c48e0747da7db23e4d4c81c5fbbde351819220163481aa287bc3f6ccb0e4665fc7d464993177adc83e9aa",
         loader: "0.20.1",
     },
     Build {
         minecraft: "1.21.4",
-        file: "DuneClientMod-1.2.5-mc1.21.4.jar",
-        sha512: "16ad12cf0457d2a518e8ccbdbedf42e56fc1621bddf3b8a36e63ffc10d9d1f3df0b71b1a496c705234196621a4a1ccc58e9f8acce37cf65e13d768993f49ae15",
+        file: "DuneClientMod-1.2.6-mc1.21.4.jar",
+        sha512: "02b32cee1a219698abcffcacde4af3c8dc960b57853cadbb09d48c5571d08473c59389f9fdfcb26d0207e572f8c45b3d09c8bd3f6d31fc031f944cc5975d7b30",
         loader: "0.20.1",
     },
     Build {
         minecraft: "1.21.1",
-        file: "DuneClientMod-1.2.5-mc1.21.1.jar",
-        sha512: "3e309992b0d56425e992de00fe46d58ca78dddc475107cda1af74d71c174077c23be8c2a2691368179e9134d8921fc581f1d59e52fe767be84855e3d71560a2a",
+        file: "DuneClientMod-1.2.6-mc1.21.1.jar",
+        sha512: "1e76e11b9e056846c2f00cf5e115bff227aba769c5b0592749fc3b9bff38142dccc358996c9cb639d4796d4d708bb819c9e4f2b2dab342c090947e400c6a6e31",
         loader: "0.20.1",
     },
     Build {
         minecraft: "1.20.1",
-        file: "DuneClientMod-1.2.5-mc1.20.1.jar",
-        sha512: "d217024b6b744f36a861d3046e70c39c066fbfec8f755afc629078c55d7fb1d5e0fdc7e25db7fa4b517090f168a4e43750850ccf573ecf058d63d7d98c84e65e",
+        file: "DuneClientMod-1.2.6-mc1.20.1.jar",
+        sha512: "f17ece65e43f66e0997b4dd16f8bc73f13c1ce6e45bd56e733f1eb144971c136751bc3c49d572a9b026530d3a62a2d55f7aa1cac18a79aa7be4816091befde88",
         loader: "0.20.1",
     },
 ];
