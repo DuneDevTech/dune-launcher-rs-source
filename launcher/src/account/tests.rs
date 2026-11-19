@@ -1145,19 +1145,63 @@ fn session_files_are_private_and_complete() {
 }
 
 #[test]
-fn client_id_is_configuration() {
-    // The run-time variable overrides; empty means not configured.
-    std::env::set_var("HORIZON_MSA_CLIENT_ID", " ");
-    assert_eq!(client_id(), None);
-    std::env::set_var(
-        "HORIZON_MSA_CLIENT_ID",
-        "00000000-1111-2222-3333-444444444444",
-    );
-    assert_eq!(
-        client_id().as_deref(),
-        Some("00000000-1111-2222-3333-444444444444")
-    );
-    std::env::remove_var("HORIZON_MSA_CLIENT_ID");
+fn client_id_is_always_the_dune_app_and_cannot_be_overridden() {
+    for var in ["HORIZON_MSA_CLIENT_ID", "DUNE_MSA_CLIENT_ID"] {
+        std::env::set_var(var, "00000000-1111-2222-3333-444444444444");
+        assert_eq!(client_id().as_deref(), Some("2f1eb485-c280-475c-9448-83fbeb91870c"));
+        std::env::set_var(var, " ");
+        assert_eq!(client_id().as_deref(), Some(DUNE_CLIENT_ID));
+        std::env::remove_var(var);
+    }
+}
+
+/// The hand-off (Electron -> this binary) is verified with the Minecraft services again: no token, no game or
+/// another profile means no launch; only the owner of the game, as that very profile, passes.
+#[test]
+fn a_handed_off_player_must_own_the_game_as_that_profile() {
+    let owner = Arc::new(Mutex::new(Mock { owns_game: true, ..Mock::default() }));
+    let ep = serve(owner.clone());
+    assert_eq!(verify_handed_off_at(&ep, "mc-token", UUID, "Notch"), Ok(()));
+    assert_eq!(verify_handed_off_at(&ep, "mc-token", "069a79f4-44e9-4726-a5be-fca90e38aaf5", "notch"), Ok(()));
+    let paths: Vec<String> = owner.lock().unwrap().log.iter().map(|(_, p, _)| p.clone()).collect();
+    assert_eq!(paths, ["/mc/entitlements/mcstore", "/mc/minecraft/profile", "/mc/entitlements/mcstore", "/mc/minecraft/profile"]);
+    // Another profile than the spec's (a forged hand-off).
+    assert_eq!(verify_handed_off_at(&ep, "mc-token", "00000000000000000000000000000000", "Notch"), Err(OTHER_PROFILE.into()));
+    assert_eq!(verify_handed_off_at(&ep, "mc-token", UUID, "Someone"), Err(OTHER_PROFILE.into()));
+    // The offline placeholder token and empty / short tokens never reach the network.
+    for t in ["0", "", "00000000", "short"] {
+        assert_eq!(verify_handed_off_at(&ep, t, UUID, "Notch"), Err(NEEDS_OWNER.into()), "{t}");
+    }
+    // An account without the game.
+    let nobody = serve(Arc::new(Mutex::new(Mock { owns_game: false, ..Mock::default() })));
+    assert_eq!(verify_handed_off_at(&nobody, "mc-token", UUID, "Notch"), Err(DOES_NOT_OWN.into()));
+    // The owner of the game without a profile.
+    let noprofile = serve(Arc::new(Mutex::new(Mock { owns_game: true, no_profile: true, ..Mock::default() })));
+    assert_eq!(verify_handed_off_at(&noprofile, "mc-token", UUID, "Notch"), Err(NO_PROFILE.into()));
+    // Services unreachable: fails closed.
+    let dead = Endpoints { microsoft: String::new(), xbox_user: String::new(), xsts: String::new(), minecraft: "http://127.0.0.1:1".into() };
+    assert!(verify_handed_off_at(&dead, "mc-token", UUID, "Notch").is_err());
+}
+
+#[test]
+fn there_is_no_offline_or_developer_play_in_the_launcher_sources() {
+    // Not compiled in at all: the source of every shipped module has no env switch or feature for account-free play.
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+    let cargo = std::fs::read_to_string(root.join("Cargo.toml")).unwrap();
+    assert!(!cargo.contains("dev-offline"));
+    let mut stack = vec![root.join("src")];
+    while let Some(dir) = stack.pop() {
+        for e in std::fs::read_dir(dir).unwrap().flatten() {
+            let p = e.path();
+            if p.is_dir() { stack.push(p); continue; }
+            if p.extension().is_none_or(|x| x != "rs") || p.to_string_lossy().contains("tests") { continue; }
+            let t = std::fs::read_to_string(&p).unwrap();
+            let t = t.split("#[cfg(test)]").next().unwrap();
+            for bad in ["DUNE_DEV_OFFLINE", "DUNE_DEV_NAME", "dev_offline()", "offline_player", "feature = \"dev-offline\""] {
+                assert!(!t.contains(bad), "{} mentions {bad}", p.display());
+            }
+        }
+    }
 }
 
 #[test]

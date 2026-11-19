@@ -111,6 +111,7 @@ pub fn download(
     log(format!(
         "Downloading Minecraft {v} from Mojang: the game and {libraries} libraries"
     ));
+    crate::progress_out::phase("minecraft");
     fetch_all(&game, jobs, fetch, cancel, log)?;
     let index = &manifest["assetIndex"];
     let index = File {
@@ -125,6 +126,7 @@ pub fn download(
         .and_then(|_| objects(&read_json(&index.path)?, dir))
         .and_then(|objects| {
             log(format!("Downloading the sounds ({} files)", objects.len()));
+            crate::progress_out::phase("assets");
             // A connection that fails now and then is tried again, and a file that still fails
             // does not stop the others: the next download fetches what is left.
             let retrying = |url: &str| {
@@ -219,6 +221,7 @@ pub fn java_runtime(
         "Downloading Minecraft's Java {name} from Mojang ({} files)",
         downloads.len()
     ));
+    crate::progress_out::phase("java");
     fetch_all(&downloads, jobs, fetch, cancel, log)?;
     #[cfg(unix)]
     {
@@ -389,6 +392,8 @@ fn fetch_each(
     let failed = Mutex::new(None);
     DONE.store(0, Relaxed);
     TOTAL.store(files.len(), Relaxed);
+    crate::progress_out::set_total(files.iter().filter_map(|f| f.size).sum());
+    crate::progress_out::emit(0, files.len());
     std::thread::scope(|scope| {
         let workers: Vec<_> = (0..jobs.clamp(1, files.len().max(1)))
             .map(|_| {
@@ -401,13 +406,18 @@ fn fetch_each(
                             failed.lock().unwrap().get_or_insert(CANCELLED.to_string());
                             break;
                         }
-                        if sha1_file(&file.path).as_ref() != Some(&file.sha1) {
+                        if sha1_file(&file.path).as_ref() == Some(&file.sha1) {
+                            crate::progress_out::add_done(file.size.unwrap_or(0));
+                        } else {
                             let got = fetch_file(fetch, file)
                                 .map_err(|e| format!("{} {e}", file.url))
                                 .and_then(|body| write_file(&file.path, &body));
-                            if let Err(e) = got {
-                                errors.fetch_add(1, Relaxed);
-                                failed.lock().unwrap().get_or_insert(e);
+                            match got {
+                                Err(e) => {
+                                    errors.fetch_add(1, Relaxed);
+                                    failed.lock().unwrap().get_or_insert(e);
+                                }
+                                Ok(()) => crate::progress_out::add_done(file.size.unwrap_or(0)),
                             }
                         }
                         DONE.store(done.fetch_add(1, Relaxed) + 1, Relaxed);
@@ -419,11 +429,15 @@ fn fetch_each(
         while !workers.iter().all(|w| w.is_finished()) {
             std::thread::sleep(Duration::from_millis(100));
             waited += 1;
+            if waited % 3 == 0 {
+                crate::progress_out::emit(done.load(Relaxed), files.len());
+            }
             if waited % 10 == 0 {
                 log(format!("{} of {} files", done.load(Relaxed), files.len()));
             }
         }
     });
+    crate::progress_out::emit(done.load(Relaxed), files.len());
     TOTAL.store(0, Relaxed);
     match failed.into_inner().unwrap() {
         Some(e) if !stop_on_error && e != CANCELLED => Err(format!(

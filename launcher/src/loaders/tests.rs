@@ -133,6 +133,48 @@ fn a_profile_comes_with_its_libraries_checked() {
     assert!(install_with(&served, "1.21.4")
         .unwrap_err()
         .contains("asm-9.7.jar is not the one"));
+    // A repository that publishes no `.sha1` for one artifact (Legacy Fabric's lwjgl natives) still installs it.
+    served.insert(asm.into(), asm_jar.clone());
+    served.remove(&format!("{asm}.sha1"));
+    install_with(&served, "1.21.4").unwrap();
+    let kept: Value =
+        serde_json::from_slice(&fs::read(dir.join(format!("versions/{id}/{id}.json"))).unwrap())
+            .unwrap();
+    assert_eq!(kept["libraries"][1]["downloads"]["artifact"]["sha1"], sha1_hex(&asm_jar));
+    fs::remove_dir_all(&dir).unwrap();
+}
+
+/// Legacy Fabric's lwjgl-platform has no jar, only `natives-<os>` classifiers named by its `natives` map.
+#[test]
+fn a_library_with_only_natives_installs_its_classifiers() {
+    let dir = std::env::temp_dir().join(format!("horizon-loaders-natives-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&dir);
+    let profile = json!({
+        "id": "fabric-loader-0.18.0-1.8.9", "inheritsFrom": "1.8.9", "mainClass": "x",
+        "libraries": [{"name": "org.lwjgl.lwjgl:lwjgl-platform:2.9.4+legacyfabric.17", "url": "https://maven.legacyfabric.net/",
+            "natives": {"linux": "natives-linux", "osx": "natives-osx", "windows": "natives-windows"}}]
+    });
+    let base = "https://maven.legacyfabric.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.4+legacyfabric.17/lwjgl-platform-2.9.4+legacyfabric.17";
+    let mut served: HashMap<String, Vec<u8>> = HashMap::from([(
+        "https://meta.legacyfabric.net/v2/versions/loader/1.8.9/0.18.0/profile/json".into(),
+        profile.to_string().into_bytes(),
+    )]);
+    for os in ["linux", "osx", "windows"] {
+        let jar = format!("jar-{os}").into_bytes();
+        served.insert(format!("{base}-natives-{os}.jar.sha1"), sha1_hex(&jar).into_bytes());
+        served.insert(format!("{base}-natives-{os}.jar"), jar);
+    }
+    let loader = Loader { kind: Kind::Fabric, version: "0.18.0".into() };
+    let fetch = |url: &str| served.get(url).cloned().ok_or(format!("404 {url}"));
+    let id = install(&loader, "1.8.9", &dir, Path::new("java"), &fetch, &|_| {}).unwrap();
+    let kept: Value = serde_json::from_slice(&fs::read(dir.join(format!("versions/{id}/{id}.json"))).unwrap()).unwrap();
+    let os = crate::java_launch::os_name();
+    let key = format!("natives-{os}");
+    let c = &kept["libraries"][0]["downloads"]["classifiers"][key.as_str()];
+    assert!(kept["libraries"][0]["downloads"]["artifact"].is_null());
+    assert_eq!(c["sha1"], sha1_hex(format!("jar-{os}").as_bytes()));
+    assert!(dir.join("libraries").join(c["path"].as_str().unwrap()).is_file());
+    assert!(crate::backend::loader_profile_usable(&dir.join(format!("versions/{id}/{id}.json"))));
     fs::remove_dir_all(&dir).unwrap();
 }
 

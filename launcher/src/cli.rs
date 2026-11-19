@@ -705,6 +705,14 @@ enum Cmd {
         #[arg(long)]
         info: bool,
     },
+    /// Dune Client (Electron launcher): wait for the visible window of a game process and print `{"phase":"window","ms":N}` (ms since `--t0`, epoch ms).
+    #[command(hide = true)]
+    WaitWindow {
+        #[arg(long)]
+        pid: u32,
+        #[arg(long)]
+        t0: Option<u64>,
+    },
     /// Write a shell completion script to stdout
     Completions { shell: clap_complete::Shell },
     /// List Dune Client releases, or the installed versions
@@ -1234,8 +1242,14 @@ fn json(value: serde_json::Value) {
 /// Runs a game process in this terminal and reports how it ended.
 fn attached(cmd: Command) -> Result<i32, String> {
     let (mut cmd, _runtime) = backend::prepare_command(cmd)?;
+    horizon_launcher::launch_trace::mark("spawning java");
     let status = backend::spawn_attached(&mut cmd)
-        .and_then(|mut child| child.wait())
+        .and_then(|mut child| {
+            horizon_launcher::launch_trace::mark("java spawned");
+            horizon_launcher::progress_out::watch_window(child.id());
+            horizon_launcher::launch_trace::watch_game_log();
+            child.wait()
+        })
         .map_err(|e| format!("Could not start {:?}: {e}", cmd.get_program()))?;
     #[cfg(unix)]
     {
@@ -1263,6 +1277,18 @@ fn execute(command: Cmd, as_json: bool) -> Result<i32, String> {
         }
     }
     match command {
+        Cmd::WaitWindow { pid, t0 } => {
+            if !horizon_launcher::progress_out::wait_window(pid) {
+                return Ok(1);
+            }
+            if let Some(t0) = t0 {
+                std::env::set_var("DUNE_LAUNCH_T0", t0.to_string());
+            }
+            std::env::set_var("DUNE_PROGRESS", "1");
+            let ms = horizon_launcher::progress_out::since_click().map(|m| m.to_string()).unwrap_or_else(|| "null".into());
+            println!("{{\"phase\":\"window\",\"ms\":{ms},\"how\":\"EnumWindows\"}}");
+            return Ok(0);
+        }
         Cmd::Handoff { info: true } => println!(
             "{}",
             serde_json::to_string(&horizon_launcher::handoff::info()).map_err(|e| e.to_string())?
@@ -1271,6 +1297,7 @@ fn execute(command: Cmd, as_json: bool) -> Result<i32, String> {
             use std::io::Read;
             let mut text = String::new();
             std::io::stdin().read_to_string(&mut text).map_err(|e| e.to_string())?;
+            horizon_launcher::launch_trace::mark("handoff: spec read from stdin");
             let spec = horizon_launcher::handoff::parse(&text);
             drop(text); // the session lived only in this string and the parsed spec
             let spec = spec?;
@@ -1278,10 +1305,14 @@ fn execute(command: Cmd, as_json: bool) -> Result<i32, String> {
             backend::POOLED_AGENTS.store(true, std::sync::atomic::Ordering::Relaxed);
             let instance = horizon_launcher::handoff::instance(&spec)?;
             let player = horizon_launcher::handoff::player(&spec);
+            // Every launch path needs a verified owner: the token is checked with the Minecraft services here too.
+            horizon_launcher::account::verify_handed_off(&player.token, &player.uuid, &player.name)?;
+            horizon_launcher::launch_trace::mark("handoff: ownership verified");
             let mut cmd = backend::java_game_for(&instance, spec.server.as_deref(), &|line| eprintln!("{line}"), Some(player))?;
             if spec.fullscreen {
                 cmd.arg("--fullscreen");
             }
+            horizon_launcher::progress_out::phase("launching");
             eprintln!("[dune-launcher] handoff: launching Minecraft {} ({})", spec.minecraft, spec.mode);
             let played = attached(cmd);
             horizon_launcher::handoff::run_after_exit(&spec, played.as_ref().copied().unwrap_or(1));

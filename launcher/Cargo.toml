@@ -1,6 +1,6 @@
 [package]
 name = "horizon-launcher"
-version = "0.4.1"
+version = "0.5.3"
 edition = "2021"
 license = "LGPL-3.0-or-later"
 description = "Dune Client launcher: Minecraft: Java Edition with the Dune Client mod (a fork of the Horizon launcher)"
@@ -12,8 +12,6 @@ name = "dune-launcher"
 path = "src/main.rs"
 
 [features]
-# Dune Client: honour DUNE_DEV_OFFLINE in release builds (QA only, never published).
-dev-offline = []
 
 [dependencies]
 horizon-mod-point-emit = { path = "../crates/horizon-mod-point-emit" }

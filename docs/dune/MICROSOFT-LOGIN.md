@@ -12,6 +12,6 @@
   pendiente). Tu cuenta y tu contraseña están bien: hasta que llegue la aprobación no se puede
   iniciar sesión ni jugar con cuenta Microsoft.» Es lo esperado, no un fallo.
 - Requisitos del formulario de Mojang que ya cumple el launcher: no se puede jugar sin cuenta que
-  posea el juego; el modo sin cuenta existe solo en compilaciones de QA (`--features dev-offline` +
-  `DUNE_DEV_OFFLINE=1`) y **nunca** en un binario publicado.
+  posea el juego; no existe ningún modo sin cuenta (ni offline, ni de QA, ni feature de compilación); el `handoff`
+  del launcher Electron vuelve a verificar token y propiedad con Minecraft services antes de arrancar el juego.
 - Las credenciales se guardan en el llavero del sistema (servicio `com.duneclient.launcher`).

@@ -246,6 +246,25 @@ pub fn unpack_natives(
     to: &Path,
 ) -> Result<(), String> {
     fs::create_dir_all(to).map_err(|e| format!("{}: {e}", to.display()))?;
+    // Extracted once: a marker holds the natives jars (path, size, mtime) the folder was filled from; the same jars
+    // and the files still there -> nothing to do (the game has the DLLs open on Windows, and re-writing them every start is slow under Defender).
+    let mut signature = String::new();
+    for library in version["libraries"].as_array().into_iter().flatten() {
+        if !allowed(&library["rules"], os, &[]) {
+            continue;
+        }
+        let Some(key) = mojang::native_classifier(library, os) else { continue };
+        let Some(path) = library["downloads"]["classifiers"][key.as_str()]["path"].as_str() else { continue };
+        let jar = minecraft.join("libraries").join(mojang::relative(path)?);
+        if let Ok(md) = fs::metadata(&jar) {
+            let mtime = md.modified().ok().and_then(|m| m.duration_since(std::time::UNIX_EPOCH).ok()).map_or(0, |d| d.as_nanos());
+            signature.push_str(&format!("{}|{}|{}\n", jar.display(), md.len(), mtime));
+        }
+    }
+    let marker = to.join(".dune-natives");
+    if !signature.is_empty() && fs::read_to_string(&marker).ok().as_deref() == Some(signature.as_str()) {
+        return Ok(());
+    }
     for library in version["libraries"].as_array().into_iter().flatten() {
         if !allowed(&library["rules"], os, &[]) {
             continue;
@@ -279,6 +298,9 @@ pub fn unpack_natives(
             let mut file = fs::File::create(&out).map_err(|e| format!("{}: {e}", out.display()))?;
             std::io::copy(&mut entry, &mut file).map_err(|e| e.to_string())?;
         }
+    }
+    if !signature.is_empty() {
+        let _ = fs::write(&marker, &signature);
     }
     Ok(())
 }

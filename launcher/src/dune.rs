@@ -51,33 +51,177 @@ pub struct Build {
     pub loader: &'static str,
 }
 
-/// The builds shipped with the launcher (same pins as the Electron launcher's `versions.ts`).
-pub const BUILDS: [Build; 4] = [
+/// The builds shipped with the launcher (generated from the Electron launcher's `versions.ts` by dune-release/release-1.3.0/stage-1.3.0.py).
+pub const BUILDS: &[Build] = &[
+    Build {
+        minecraft: "26.3",
+        file: "DuneClientMod-1.3.0-r3-full-mc26.3.jar",
+        sha512: "f540b95276ee1efc13b134931b16793410dfa6d68f0ef6951bb54232c8319eb5d7fbe349374c76d1678c8032a663132b100fb33da716be542b639ff59418b85b",
+        loader: "0.20.1",
+    },
+    Build {
+        minecraft: "26.2",
+        file: "DuneClientMod-1.3.0-r3-full-mc26.2.jar",
+        sha512: "1ac52e3350a0df260685b658fe94957387ff505d7d3bcd0f39c860da3259e6ef5326abb7214b47dc33fcddb6c16eaabd602ac8495b316c054b426c7b55dfebff",
+        loader: "0.20.1",
+    },
+    Build {
+        minecraft: "26.1.2",
+        file: "DuneClientMod-1.3.0-r3-full-mc26.1.2.jar",
+        sha512: "065b297fc5b194826c7f2fcd01ede64e4291cfdc791189475e1751ba7add7a64b33e0ffa1860387e5e2469043f6d19659b9897575434e20cb36b57e01d7e6363",
+        loader: "0.20.1",
+    },
     Build {
         minecraft: "1.21.11",
-        file: "DuneClientMod-1.2.6-mc1.21.11.jar",
-        sha512: "8c62e61cdded6e2bbb7f1742ea82a6b10e3461f9bc1c48e0747da7db23e4d4c81c5fbbde351819220163481aa287bc3f6ccb0e4665fc7d464993177adc83e9aa",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.21.11.jar",
+        sha512: "43b84b617848fc046d7ec8e45149d38515d92440f69c7c62cb340be37391bc8b32567e5107893b8cc8f100c71e9391ce63e57efda88d12c4ac1ce5f65f5c9bda",
+        loader: "0.20.1",
+    },
+    Build {
+        minecraft: "1.21.10",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.21.10.jar",
+        sha512: "f91f3c99ac7f8c754a71841a6821f432025391058b3653362a939a18794b9667971bb9cae58c13afad128ad2b2e0059f7cd412d949404933d476c82dde5a574c",
+        loader: "0.20.1",
+    },
+    Build {
+        minecraft: "1.21.8",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.21.8.jar",
+        sha512: "6856085e699cc85ccc34e6bdd4a237c500016f79e91aaa3376dd9931dc71d7f914034504e059032e9a59f3f937254d8413283dfa82734d43299d9a1b850bbe8b",
+        loader: "0.20.1",
+    },
+    Build {
+        minecraft: "1.21.7",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.21.7.jar",
+        sha512: "f6171f5fe3b5a4fa35b1abd03b299d296799e940e9ff46ddcb2eecd0fd7c4844ee41aaaffb44cc606e8c1e38c44a453d074402d842d4508566555f214d4b095c",
+        loader: "0.20.1",
+    },
+    Build {
+        minecraft: "1.21.6",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.21.6.jar",
+        sha512: "659d9859f295208cab5bf3206d96a838e96c57ba9954be388d142901f2490295fe26677e7d3224171f7655ec56fc908754deaf0b8b81a47f09f018bd49ba1692",
+        loader: "0.20.1",
+    },
+    Build {
+        minecraft: "1.21.5",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.21.5.jar",
+        sha512: "dc6bc59d772c523f89f9c9f7671b7123926d94ce2236bd517416b2461292003c1e27cb82976afb6629d53deccf8f325cfeb8acd08d44f0af7c990b4b22b65a82",
         loader: "0.20.1",
     },
     Build {
         minecraft: "1.21.4",
-        file: "DuneClientMod-1.2.6-mc1.21.4.jar",
-        sha512: "02b32cee1a219698abcffcacde4af3c8dc960b57853cadbb09d48c5571d08473c59389f9fdfcb26d0207e572f8c45b3d09c8bd3f6d31fc031f944cc5975d7b30",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.21.4.jar",
+        sha512: "89e348e94bb38b0f6f7b9ff3a33544d04c0e0afd09ca53f27cbc95cff3a7c3f93cc2b54eb8446c64c2c01120981aa3bda6b446cdd5efa1ee8a9e87fbffb204e5",
+        loader: "0.20.1",
+    },
+    Build {
+        minecraft: "1.21.3",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.21.3.jar",
+        sha512: "62d0c5c93b715804c21cbd044f132fb5c1584985551b589b60e284524908472a053a7ebd26d83ef2bfa22d064b4f5f7541385de76e39aa28690a2dde907e5466",
+        loader: "0.20.1",
+    },
+    Build {
+        minecraft: "1.21.2",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.21.2.jar",
+        sha512: "e04ba40e274ad25f40412e6b0b6dcef18e0c69ec0c8234e4bafb8a4c05dc470dcacf3264f14e02afdf56166a73cec7f13abaf91f791b1e2fda931a249e38f4e6",
         loader: "0.20.1",
     },
     Build {
         minecraft: "1.21.1",
-        file: "DuneClientMod-1.2.6-mc1.21.1.jar",
-        sha512: "1e76e11b9e056846c2f00cf5e115bff227aba769c5b0592749fc3b9bff38142dccc358996c9cb639d4796d4d708bb819c9e4f2b2dab342c090947e400c6a6e31",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.21.1.jar",
+        sha512: "bf7667b4ec327931f218951a12e7f7f1e8e024c379afe428f5fd1040b2dc9a24f4d4faae5ce9b39834878b308010688dff53207cdb23b0752eb90f075cc81cbe",
+        loader: "0.20.1",
+    },
+    Build {
+        minecraft: "1.21",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.21.jar",
+        sha512: "26bade0b2d7441e3fd349502930fad8835abc78ce0c5197e8580c70cf86f8e395d29ae837b539cb398a6313aa81014205165987c2ac5db842845ff674b4434a7",
+        loader: "0.20.1",
+    },
+    Build {
+        minecraft: "1.20.6",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.20.6.jar",
+        sha512: "69f14c0a9eaa5b4a77fb12a27a53652ab97520dd919d28d3fe937b5413951f4621cbd4feb61e5cbadfe1feb6ae82bf13ebc542a76c48012a377482a4079a965a",
+        loader: "0.20.1",
+    },
+    Build {
+        minecraft: "1.20.4",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.20.4.jar",
+        sha512: "8599996296c18a692010b157df74a11f5cfaba3a067528205025b98457a40fffa53d2fa6f1845965c5076f83a9bf857e3e98bd910cc9f9b3ca14f8b8b61e22d0",
         loader: "0.20.1",
     },
     Build {
         minecraft: "1.20.1",
-        file: "DuneClientMod-1.2.6-mc1.20.1.jar",
-        sha512: "f17ece65e43f66e0997b4dd16f8bc73f13c1ce6e45bd56e733f1eb144971c136751bc3c49d572a9b026530d3a62a2d55f7aa1cac18a79aa7be4816091befde88",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.20.1.jar",
+        sha512: "776c70873e5a19cb6d9190fb9570c31c784403ba0a6387daea4e5978f5d8637fe5419755a53ac44c74271729ddd2dd658415509f6ee43c23e1b498dfdd527bf1",
         loader: "0.20.1",
     },
+    Build {
+        minecraft: "1.19.4",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.19.4.jar",
+        sha512: "d5a71f47e5e5cd03443ba41bdb66a0084c8e0abb2d2cdc628f92cd1ca048475cfd4f06b1258881763d791222cfb63a14c96631644df25495dafab802ccd41ab3",
+        loader: "0.20.1",
+    },
+    Build {
+        minecraft: "1.19.2",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.19.2.jar",
+        sha512: "39930c72652a4e69f35fc0ac6631e079dd0fb4847d8e3a9838a45ac7e8aa628a8deefd33409b6f927ee8b41b6cef3a824838e4adcb332b1731c28c7f923600de",
+        loader: "0.20.1",
+    },
+    Build {
+        minecraft: "1.18.2",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.18.2.jar",
+        sha512: "303bfc2e5f7b8b9913e5e5005ee960854255a9e0becbdf4683c2a3f9cffd07a33bf222b1dceff10f69becca63c72188cbfb5cde632cde9e9baf1c7d3054dd390",
+        loader: "0.20.1",
+    },
+    Build {
+        minecraft: "1.17.1",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.17.1.jar",
+        sha512: "3d11f6cec08827b8bf06ccaff09ba40263055f27d7fb92614cf855fd4f9f47a5603f050aebfd33c100d768841e659f6f9a786740d23d8cc7bedf44ca1a1474c5",
+        loader: "0.20.1",
+    },
+    Build {
+        minecraft: "1.16.5",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.16.5.jar",
+        sha512: "25dfe9db15cf9ab972897a27d0f5777d15ecbfb7b87c0cabfc8f68a274ae71c85b63c128b051180c5d1704b2c7f082bc92161d3401f9f59dfc7c28c9ce8f19ac",
+        loader: "0.20.1",
+    },
+    Build {
+        minecraft: "1.12.2",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.12.2.jar",
+        sha512: "7b1ad3b443ecd7f6211170bd82a01aed7721d2a9e257a776b45590ab8d686dc56f9a3fca8e991c1216d3c8fd3186047b49e8828d6b59ee153604981f085f95d7",
+        loader: "0.18.0",
+    },
+    Build {
+        minecraft: "1.11.2",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.11.2.jar",
+        sha512: "b74c1c1a30da0976e414700ded330038929fcda1929db79aeb96f95bfc6a364abc4814aa5dc7f1588ebcae8568a2f67148af6c0874f73fa40b060d1e3d945b14",
+        loader: "0.18.0",
+    },
+    Build {
+        minecraft: "1.10.2",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.10.2.jar",
+        sha512: "cdb2c96c5474bbf5e8bd992fe10e28cc82bce717cf1f070e2ff8d3b828fac14f9a468772bccc21656fe73df3b8b326138d82b2512a01b2f2db3b164ee07624f2",
+        loader: "0.18.0",
+    },
+    Build {
+        minecraft: "1.9.4",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.9.4.jar",
+        sha512: "40044e4fb315d566cd1e93e9c8a916ac4fd2f966d441b040335a15d59393766b1e06e67515bb3719cd7e6f5d50af0494013aa3c8fc8b61f2213c182bf242cc91",
+        loader: "0.18.0",
+    },
+    Build {
+        minecraft: "1.8.9",
+        file: "DuneClientMod-1.3.0-r3-full-mc1.8.9.jar",
+        sha512: "334c40bb68809e322559b3b6b5d1ba46bf46dbb219de231d8ec68be0fc37467a9c7906f95a29c5bf850dfae26ca55550c2ead138275a8ba3b7bbb24790147e45",
+        loader: "0.18.0",
+    },
 ];
+
+/// Minecraft 1.8-1.12 (Legacy Fabric): no Fabric API / Mod Menu on Modrinth, the Dune jar is self-contained.
+pub fn is_legacy_fabric(minecraft: &str) -> bool {
+    let mut parts = minecraft.split('.');
+    parts.next() == Some("1") && parts.next().and_then(|m| m.parse::<u32>().ok()).is_some_and(|m| (8..=12).contains(&m))
+}
 
 pub fn build_for(minecraft: &str) -> Option<&'static Build> {
     BUILDS.iter().find(|b| b.minecraft == minecraft)
@@ -93,6 +237,33 @@ fn sha512_hex(bytes: &[u8]) -> String {
         .collect()
 }
 
+
+const SIGS_FILE: &str = ".dune-sigs.json";
+
+/// sha512 of a file, remembered per size + mtime in `<folder>/.dune-sigs.json`: a repeat launch does not read and hash
+/// the same multi-MB jars again (slow under Windows Defender); a changed file (size or mtime) is hashed again.
+fn sha512_of_file(path: &Path) -> Option<String> {
+    let md = std::fs::metadata(path).ok()?;
+    let mtime = md.modified().ok()?.duration_since(std::time::UNIX_EPOCH).ok()?.as_nanos() as u64;
+    let name = path.file_name()?.to_str()?.to_owned();
+    let sigs_path = path.parent()?.join(SIGS_FILE);
+    let mut sigs: serde_json::Map<String, serde_json::Value> = std::fs::read(&sigs_path)
+        .ok()
+        .and_then(|b| serde_json::from_slice(&b).ok())
+        .unwrap_or_default();
+    if let Some(e) = sigs.get(&name) {
+        if e[0].as_u64() == Some(md.len()) && e[1].as_u64() == Some(mtime) {
+            if let Some(h) = e[2].as_str() {
+                return Some(h.to_owned());
+            }
+        }
+    }
+    let hash = sha512_hex(&std::fs::read(path).ok()?);
+    sigs.insert(name, serde_json::json!([md.len(), mtime, hash]));
+    let _ = std::fs::write(&sigs_path, serde_json::to_vec(&sigs).unwrap_or_default());
+    Some(hash)
+}
+
 /// Makes sure `<game_dir>/mods/DuneClientMod.jar` is the pinned build for `minecraft`:
 /// downloads it over https from our host when missing or when its sha512 differs.
 /// Other jars in `mods/` are left alone.
@@ -106,10 +277,8 @@ pub fn ensure_mod(
         .ok_or_else(|| format!("Dune Client has no mod build for Minecraft {minecraft}"))?;
     let mods = game_dir.join("mods");
     let target = mods.join(MOD_FILE);
-    if let Ok(have) = std::fs::read(&target) {
-        if sha512_hex(&have) == build.sha512 {
-            return Ok(target);
-        }
+    if sha512_of_file(&target).as_deref() == Some(build.sha512) {
+        return Ok(target);
     }
     let url = format!(
         "https://{}/downloads/client/{}",
@@ -237,6 +406,9 @@ pub fn ensure_required_mods(
     fetch: &dyn Fn(&str) -> Result<Vec<u8>, String>,
     log: &dyn Fn(String),
 ) -> Result<(), String> {
+    if is_legacy_fabric(minecraft) {
+        return Ok(());
+    }
     let wanted: Vec<&str> = REQUIRED_MODS.iter().copied().chain(with_mod_menu.then_some(MOD_MENU)).collect();
     ensure_mods(game_dir, minecraft, &wanted, fetch, log)
 }
@@ -248,6 +420,9 @@ pub fn ensure_fabric_api(
     fetch: &dyn Fn(&str) -> Result<Vec<u8>, String>,
     log: &dyn Fn(String),
 ) -> Result<(), String> {
+    if is_legacy_fabric(minecraft) {
+        return Ok(());
+    }
     ensure_mods(game_dir, minecraft, &[FABRIC_API], fetch, log)
 }
 
@@ -260,6 +435,12 @@ fn ensure_mods(
 ) -> Result<(), String> {
     let mods = game_dir.join("mods");
     std::fs::create_dir_all(&mods).map_err(|e| format!("{}: {e}", mods.display()))?;
+    // Fast path: every wanted mod was resolved and hash-verified recently for this Minecraft version and is
+    // still on disk with the same sha512 -> no Modrinth round trips (they sat in front of every launch).
+    if verified_recently(&mods, minecraft, wanted) {
+        return Ok(());
+    }
+    let mut verified: std::collections::BTreeMap<String, (String, String)> = Default::default();
     let lock = mods.join(".dune-managed.json");
     let mut managed: std::collections::BTreeMap<String, String> = std::fs::read(&lock)
         .ok()
@@ -269,9 +450,7 @@ fn ensure_mods(
         match resolve(slug, minecraft, fetch) {
             Ok((name, url, sha)) => {
                 let target = mods.join(&name);
-                let current = std::fs::read(&target)
-                    .map(|b| sha512_hex(&b) == sha)
-                    .unwrap_or(false);
+                let current = sha512_of_file(&target).as_deref() == Some(sha.as_str());
                 if !current {
                     log(format!("Downloading {slug} ({name})"));
                     let body = fetch(&url)?;
@@ -283,6 +462,7 @@ fn ensure_mods(
                     std::fs::rename(&part, &target)
                         .map_err(|e| format!("{}: {e}", target.display()))?;
                 }
+                verified.insert(slug.to_owned(), (name.clone(), sha.clone()));
                 if let Some(old) = managed.insert(slug.to_owned(), name.clone()) {
                     if old != name {
                         let _ = std::fs::remove_file(mods.join(old));
@@ -296,45 +476,70 @@ fn ensure_mods(
         }
     }
     std::fs::write(&lock, serde_json::to_vec_pretty(&managed).unwrap_or_default())
-        .map_err(|e| format!("{}: {e}", lock.display()))
-}
-
-/// Developer/QA only: `DUNE_DEV_OFFLINE=1` plays with an offline name and skips the Microsoft
-/// owner gate. It exists only in debug builds or builds made with `--features dev-offline`;
-/// published release builds ignore the variable.
-pub fn dev_offline() -> bool {
-    cfg!(any(debug_assertions, feature = "dev-offline"))
-        && std::env::var_os("DUNE_DEV_OFFLINE").as_deref() == Some(std::ffi::OsStr::new("1"))
-}
-
-/// The offline QA player.
-pub fn offline_player(name: &str) -> crate::java_launch::Player {
-    // A stable, valid-format UUID derived from the name (SHA-512 based, not vanilla's MD5
-    // OfflinePlayer UUID): only used for single-player QA.
-    let digest = Sha512::digest(format!("OfflinePlayer:{name}").as_bytes());
-    let mut b = [0u8; 16];
-    b.copy_from_slice(&digest[..16]);
-    b[6] = (b[6] & 0x0f) | 0x30;
-    b[8] = (b[8] & 0x3f) | 0x80;
-    let h: String = b.iter().map(|x| format!("{x:02x}")).collect();
-    crate::java_launch::Player {
-        name: name.to_owned(),
-        uuid: format!(
-            "{}-{}-{}-{}-{}",
-            &h[0..8],
-            &h[8..12],
-            &h[12..16],
-            &h[16..20],
-            &h[20..32]
-        ),
-        token: "0".into(),
-        xuid: String::new(),
+        .map_err(|e| format!("{}: {e}", lock.display()))?;
+    if verified.len() == wanted.len() {
+        write_verified(&mods, minecraft, &verified);
     }
+    Ok(())
+}
+
+/// How long a successful Modrinth resolution is trusted before the next launch asks again.
+const VERIFIED_TTL_SECS: u64 = 12 * 3600;
+const VERIFIED_FILE: &str = ".dune-verified.json";
+
+fn now_secs() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0)
+}
+
+fn write_verified(
+    mods: &Path,
+    minecraft: &str,
+    done: &std::collections::BTreeMap<String, (String, String)>,
+) {
+    let stamp = serde_json::json!({ "minecraft": minecraft, "at": now_secs(), "mods": done });
+    let _ = std::fs::write(mods.join(VERIFIED_FILE), serde_json::to_vec(&stamp).unwrap_or_default());
+}
+
+/// True when a fresh stamp lists every wanted slug for `minecraft` and each file is on disk with the stamped sha512.
+fn verified_recently(mods: &Path, minecraft: &str, wanted: &[&str]) -> bool {
+    let Ok(bytes) = std::fs::read(mods.join(VERIFIED_FILE)) else {
+        return false;
+    };
+    let Ok(v) = serde_json::from_slice::<serde_json::Value>(&bytes) else {
+        return false;
+    };
+    let at = v["at"].as_u64().unwrap_or(0);
+    let now = now_secs();
+    if v["minecraft"].as_str() != Some(minecraft) || at > now || now - at > VERIFIED_TTL_SECS {
+        return false;
+    }
+    wanted.iter().all(|slug| {
+        let entry = &v["mods"][*slug];
+        match (entry[0].as_str(), entry[1].as_str()) {
+            (Some(name), Some(sha)) if !name.contains(['/', '\\']) => {
+                sha512_of_file(&mods.join(name)).as_deref() == Some(sha)
+            }
+            _ => false,
+        }
+    })
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn legacy_fabric_range() {
+        for v in ["1.8.9", "1.9.4", "1.10.2", "1.11.2", "1.12.2"] {
+            assert!(is_legacy_fabric(v), "{v}");
+        }
+        for v in ["1.16.5", "1.18.2", "1.21.11", "26.3", "1.21"] {
+            assert!(!is_legacy_fabric(v), "{v}");
+        }
+    }
 
     #[test]
     fn every_build_has_a_wellformed_pin() {
@@ -355,11 +560,25 @@ mod tests {
     }
 
     #[test]
-    fn offline_player_is_stable() {
-        let a = offline_player("DuneDev");
-        assert_eq!(a.uuid, offline_player("DuneDev").uuid);
-        assert_eq!(a.uuid.len(), 36);
+    fn recent_verification_skips_modrinth_until_stale_or_changed() {
+        let dir = tempfile::tempdir().unwrap();
+        let mods = dir.path();
+        std::fs::write(mods.join("fabric-api.jar"), b"jar").unwrap();
+        let mut done = std::collections::BTreeMap::new();
+        done.insert("fabric-api".to_owned(), ("fabric-api.jar".to_owned(), sha512_hex(b"jar")));
+        assert!(!verified_recently(mods, "1.21.11", &["fabric-api"]), "no stamp yet");
+        write_verified(mods, "1.21.11", &done);
+        assert!(verified_recently(mods, "1.21.11", &["fabric-api"]));
+        assert!(!verified_recently(mods, "1.21.10", &["fabric-api"]), "other minecraft version");
+        assert!(!verified_recently(mods, "1.21.11", &["fabric-api", "malilib"]), "a wanted mod is missing");
+        std::fs::write(mods.join("fabric-api.jar"), b"tampered").unwrap();
+        assert!(!verified_recently(mods, "1.21.11", &["fabric-api"]), "file changed on disk");
+        std::fs::write(mods.join("fabric-api.jar"), b"jar").unwrap();
+        let stale = serde_json::json!({ "minecraft": "1.21.11", "at": now_secs() - VERIFIED_TTL_SECS - 5, "mods": done });
+        std::fs::write(mods.join(VERIFIED_FILE), serde_json::to_vec(&stale).unwrap()).unwrap();
+        assert!(!verified_recently(mods, "1.21.11", &["fabric-api"]), "stamp older than the TTL");
     }
+
 }
 
 #[cfg(test)]

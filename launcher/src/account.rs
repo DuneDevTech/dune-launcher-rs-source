@@ -44,18 +44,10 @@ pub const DUNE_CLIENT_ID: &str = "2f1eb485-c280-475c-9448-83fbeb91870c";
 /// What the Minecraft services answer (403) while Mojang has not approved the app yet.
 pub const NOT_APPROVED: &str = "Mojang todavía no ha aprobado Dune Client para iniciar sesión con Microsoft (la solicitud está pendiente). Tu cuenta y tu contraseña están bien: hasta que llegue la aprobación no se puede iniciar sesión ni jugar con cuenta Microsoft.";
 
-/// The configured Azure app, if any: the run-time variable wins over the build-time one, and an
-/// empty value means none.
+/// Dune Client's own Azure app, always. No run-time or build-time override exists (no environment variable, no
+/// borrowed application ID): Mojang approved this ID for this app only.
 pub fn client_id() -> Option<String> {
-    std::env::var("DUNE_MSA_CLIENT_ID")
-        .ok()
-        .or_else(|| std::env::var("HORIZON_MSA_CLIENT_ID").ok())
-        .or_else(|| option_env!("DUNE_MSA_CLIENT_ID").map(str::to_owned))
-        .or_else(|| option_env!("HORIZON_MSA_CLIENT_ID").map(str::to_owned))
-        // Dune Client's own Azure app (public client, device code flow; Mojang must approve it).
-        .or_else(|| Some(DUNE_CLIENT_ID.to_owned()))
-        .map(|id| id.trim().to_owned())
-        .filter(|id| !id.is_empty())
+    Some(DUNE_CLIENT_ID.to_owned())
 }
 
 /// Where the requests go: the real services, or a mock in tests.
@@ -473,6 +465,30 @@ fn owns_game(ep: &Endpoints, token: &str) -> Result<bool, String> {
                 )
             })
         }))
+}
+
+/// The Electron launcher's hand-off carries a Minecraft token it obtained itself. This binary never trusts that
+/// blindly: it asks the Minecraft services (entitlements/mcstore + profile) who the token belongs to and whether
+/// they own Minecraft: Java Edition, and refuses to start the game unless the profile is the player named in the
+/// spec. No token, an unowned game, another profile or an unreachable service all mean no game (fails closed).
+pub fn verify_handed_off(token: &str, uuid: &str, name: &str) -> Result<(), String> {
+    verify_handed_off_at(&Endpoints::live(), token, uuid, name)
+}
+
+pub(crate) fn verify_handed_off_at(ep: &Endpoints, token: &str, uuid: &str, name: &str) -> Result<(), String> {
+    if token.len() < 8 || token.chars().all(|c| c == '0') {
+        return Err(NEEDS_OWNER.into());
+    }
+    if !owns_game(ep, token)? {
+        return Err(DOES_NOT_OWN.into());
+    }
+    let Some(profile) = profile(ep, token)? else {
+        return Err(NO_PROFILE.into());
+    };
+    if profile.uuid != uuid.replace('-', "").to_lowercase() || !profile.name.eq_ignore_ascii_case(name) {
+        return Err(OTHER_PROFILE.into());
+    }
+    Ok(())
 }
 
 /// A Minecraft profile, as the launcher shows and remembers it (no secrets).

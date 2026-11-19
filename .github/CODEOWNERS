@@ -1,3 +1,7 @@
+# Dune: propietario por defecto (la ultima regla que coincide gana, asi que las reglas de abajo siguen mandando).
+*  @CrisAlvar3z
+# Devs (cuando se incorporen): * @DEV1-PENDIENTE @DEV2-PENDIENTE @DEV3-PENDIENTE
+
 # Changes to these files wait for a council member's review (council poll P35, 2026-11-10) once branch protection requires code owners' reviews
 # (tools/ci/protect_pipeline.sh, docs/security.md). They are what builds, signs and ships releases, the code that
 # checks downloads before installing them (backend.rs downloads, installs and updates the launcher itself; links.json

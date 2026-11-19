@@ -219,7 +219,7 @@ mod tests {
         assert_eq!(g.loader.unwrap().version, "0.20.1");
         // any version works (no Dune build needed) as long as the loader version is given
         assert!(plain(r#","loaderVersion":"0.16.0""#, "1.19.4").is_ok());
-        assert!(plain("", "1.19.4").is_err()); // no loader version to use
+        assert!(plain("", "1.13.2").is_err()); // no loader version to use
         let off = plain(r#","loaderVersion":"0.20.1","fabricApi":false"#, "1.21.11").unwrap().java.unwrap();
         assert!(!off.fabric_api && !off.dune);
         assert!(parse(&json("").replace("\"dune\"", "\"vanilla\"")).is_err());
@@ -227,7 +227,7 @@ mod tests {
 
     #[test]
     fn dune_mode_needs_a_dune_build() {
-        let spec = parse(&json("").replace("1.21.11", "1.8.9")).unwrap();
+        let spec = parse(&json("").replace("1.21.11", "1.13.2")).unwrap();
         assert!(instance(&spec).is_err());
     }
 

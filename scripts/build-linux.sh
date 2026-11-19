@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Linux x86_64 build of the Dune Client launcher: stripped binary, .tar.gz (what `linux-x86_64-tar`
-# updates from) and AppImage. Never built with the `dev-offline` QA feature.
+# updates from) and AppImage. The `dev-offline` feature and every account-free path no longer exist.
 # Heavy: one build at a time, nice, -j2.
 set -euo pipefail
 cd "$(dirname "$0")/.."

@@ -1,0 +1,23 @@
+# gitleaks: reglas por defecto + falsos positivos REVISADOS a mano (valores de ejemplo en tests/docs, claves publicas).
+# No anadir rutas sin revisar que el valor no es un secreto real.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Falsos positivos revisados"
+paths = [
+  '''crates/horizon-client/src/realms/client\.rs''',
+  '''crates/horizon-mod-package/src/index/registry/tests\.rs''',
+  '''crates/horizon-mod-package/tests/index/index-v1\.json''',
+  '''crates/horizon-server-files/src/profiles\.rs''',
+  '''crates/horizon-server/src/management\.rs''',
+  '''docs/fabric-ledger\.md''',
+  '''launcher/src/java_launch/tests\.rs''',
+  '''packaging/server/install\.sh''',
+  '''tests/install_ps1_signature\.ps1''',
+  '''tests/install_sh_signature\.sh''',
+  '''tests/test_preparation_step\.py''',
+  '''tools/test_management_protocol_parity\.py''',
+  '''tools/test_structure_layout_parity\.py''',
+  '''tools/test_worldgen_parity\.py''',
+]

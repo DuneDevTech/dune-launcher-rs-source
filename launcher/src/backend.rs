@@ -2057,8 +2057,9 @@ pub fn download_version_for_owner(
     Ok(dir)
 }
 
-/// Dune Client QA (`DUNE_DEV_OFFLINE=1`): Mojang's public files without the owner gate.
-fn download_version_dev(
+/// Mojang's public files for a player the hand-off already verified (`account::verify_handed_off`: token + game
+/// ownership + profile, checked by `cli.rs` before this runs). Never reachable without that check.
+fn download_version_verified(
     id: &str,
     manifest_sha1: &str,
     log: &dyn Fn(String),
@@ -2107,10 +2108,6 @@ pub fn java_game_for(
     let handed_off_player = handed_off.is_some();
     let player = if let Some(player) = handed_off {
         player
-    } else if crate::dune::dev_offline() {
-        crate::dune::offline_player(
-            &std::env::var("DUNE_DEV_NAME").unwrap_or_else(|_| "DuneDev".into()),
-        )
     } else {
         account::java_player()?
     };
@@ -2128,8 +2125,8 @@ pub fn java_game_for(
     if !marker.is_file() {
         let listed = crate::minecraft_versions::load()?;
         let version = listed.find(&game.minecraft)?;
-        if !gated || crate::dune::dev_offline() {
-            download_version_dev(&version.id, &version.sha1, log)?;
+        if !gated {
+            download_version_verified(&version.id, &version.sha1, log)?;
         } else {
             download_version_for_owner(&version.id, &version.sha1, log)?;
         }
@@ -2143,20 +2140,29 @@ pub fn java_game_for(
             .join(format!("{id}.json")))
     };
     let vanilla = crate::java_launch::read(&file(&game.minecraft)?)?;
+    crate::launch_trace::mark("vanilla version json read");
     let need = crate::java::Need::of(&crate::java_launch::resolve(vanilla, &minecraft)?);
-    let found = crate::java::pick(
-        &need,
-        game.home.as_deref(),
-        &crate::java::mojang_runtimes(&crate::java::runtimes_dir()),
-        &crate::java::installed(),
-    )?;
+    // Hot path: a chosen home (the Electron hand-off always names one) or a Mojang runtime of the right major is
+    // enough; the scan of every installed Java (PATH, Program Files, .jdks: many stats and file reads Defender sees) only runs when neither is.
+    let found = if game.home.is_some() {
+        crate::java::pick(&need, game.home.as_deref(), &[], &[])?
+    } else {
+        let mojang_found = crate::java::mojang_runtimes(&crate::java::runtimes_dir());
+        if mojang_found.iter().any(|r| r.major == need.major) {
+            crate::java::pick(&need, None, &mojang_found, &[])?
+        } else {
+            crate::java::pick(&need, None, &mojang_found, &crate::java::installed())?
+        }
+    };
     let runtime = match found {
         Some(runtime) => runtime,
         None => {
             log(format!("Downloading Java {} from Mojang", need.major));
+            crate::progress_out::phase("java");
             crate::java::install(&need, log)?
         }
     };
+    crate::launch_trace::mark("java runtime picked");
     let mut start = game.minecraft.clone();
     if let Some(loader) = &game.loader {
         start = loader.kind.profile_id(&loader.version, &game.minecraft);
@@ -2165,6 +2171,7 @@ pub fn java_game_for(
         // `downloads.artifact`): a marker alone does not prove the profile is one this launcher can start.
         let usable = marker.is_file() && (!handed_off_player || loader_profile_usable(&file(&start)?));
         if !usable {
+            crate::progress_out::phase("fabric");
             start = crate::loaders::install(
                 loader,
                 &game.minecraft,
@@ -2176,7 +2183,11 @@ pub fn java_game_for(
             fs::write(downloaded(&start)?, "").map_err(|e| e.to_string())?;
         }
     }
+    crate::launch_trace::mark("loader profile checked");
     let dune_mode = game.mode();
+    if dune_mode.property().is_some() || (game.fabric_api && game.loader.is_some()) {
+        crate::progress_out::phase("mods");
+    }
     if let Some(_) = dune_mode.property() {
         crate::dune::ensure_required_mods(
             &instance.home,
@@ -2189,6 +2200,7 @@ pub fn java_game_for(
     } else if game.fabric_api && game.loader.is_some() {
         crate::dune::ensure_fabric_api(&instance.home, &game.minecraft, &get_bytes, log)?;
     }
+    crate::launch_trace::mark("mods ensured (no network when stamped)");
     let version =
         crate::java_launch::resolve(crate::java_launch::read(&file(&start)?)?, &minecraft)?;
     let mut jvm_args: Vec<String> = game.jvm_args.split_whitespace().map(String::from).collect();
@@ -2222,7 +2234,7 @@ pub fn loader_profile_usable(profile: &Path) -> bool {
     let Ok(text) = fs::read_to_string(profile) else { return false };
     let Ok(json) = serde_json::from_str::<serde_json::Value>(&text) else { return false };
     json["libraries"].as_array().is_some_and(|libs| {
-        !libs.is_empty() && libs.iter().all(|l| l["downloads"]["artifact"]["path"].is_string())
+        !libs.is_empty() && libs.iter().all(|l| l["downloads"]["artifact"]["path"].is_string() || l["downloads"]["classifiers"].is_object())
     })
 }
 
@@ -4674,7 +4686,7 @@ mod tests {
 
     /// The launcher downloads Mojang's game files (client jar, libraries, assets) only for an
     /// account the services said owns the game: never without one, and never past the gate by
-    /// the developer option (`Settings::dev_offline`), whose pass has no owner.
+    /// any developer option.
     #[test]
     fn mojang_downloads_only_for_an_owner() {
         let dir = std::env::temp_dir().join(format!("horizon-owner-only-{}", std::process::id()));
@@ -4761,8 +4773,8 @@ mod tests {
                     .map(move |_| name.as_str())
             })
             .collect();
-        // Dune Client adds one more, `download_version_dev`, which only runs under the
-        // `dev-offline` feature (never in a published build, see `dune::dev_offline`).
+        // Dune Client adds one more, `download_version_verified`, which only the hand-off reaches, after
+        // `account::verify_handed_off` confirmed the token's owner has the game (no offline path exists).
         assert_eq!(calls, ["backend.rs", "backend.rs"]);
         let backend = &sources.iter().find(|(n, ..)| n == "backend.rs").unwrap().2;
         let body = |f: &str| {

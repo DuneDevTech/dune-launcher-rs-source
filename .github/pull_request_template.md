@@ -44,3 +44,16 @@
 
 <!-- Please tick "Allow edits by maintainers": we push small fixups ourselves instead of a round trip.
      See CONTRIBUTING.md. -->
+
+
+---
+
+## Checklist Dune (ES)
+- [ ] El PR va contra `dev` (nunca push directo a `dev`/`main`); la rama se llama `feat/...` o `fix/...`
+- [ ] La CI esta en verde
+- [ ] Logica nueva: la prueba se escribio **antes** (TDD) y la vi fallar
+- [ ] Si es un fix: incluye un **test de regresion** que falla sin el arreglo
+- [ ] Si toca UI: adjunto captura(s) de pantalla (antes/despues)
+- [ ] Sin secretos, tokens ni claves en el diff
+- [ ] Otra persona (o @CrisAlvar3z) ha revisado el PR
+

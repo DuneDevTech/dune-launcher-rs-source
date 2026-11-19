@@ -5,6 +5,8 @@ pub mod backend;
 pub mod dune;
 pub mod dune_update;
 pub mod handoff;
+pub mod launch_trace;
+pub mod progress_out;
 pub mod browser;
 pub mod build_import;
 pub mod data_location;

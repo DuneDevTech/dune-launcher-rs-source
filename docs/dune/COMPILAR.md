@@ -36,5 +36,4 @@ entorno (`data_location::…stale_worker…` falla a veces en paralelo por reuti
 ## QA con pantalla (sin tocar ningún Xvfb/Chrome de otros)
 `dune-horizon/shoot.sh NOMBRE [PAGINA] [SEGUNDOS]` abre un sway headless propio
 (`XDG_RUNTIME_DIR=/tmp/dune-xdg`), arranca el launcher con `HORIZON_LAUNCHER_PAGE` y captura con grim.
-Variables de QA: `HORIZON_LAUNCHER_HOME`, `HORIZON_HOME`, `DUNE_DEV_OFFLINE=1` (solo con
-`--features dev-offline` o build debug), `HORIZON_NO_KEYCHAIN=1`.
+Variables de QA: `HORIZON_LAUNCHER_HOME`, `HORIZON_HOME`, `HORIZON_NO_KEYCHAIN=1` (`DUNE_DEV_OFFLINE` y `dev-offline` ya no existen).

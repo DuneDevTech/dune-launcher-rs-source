@@ -1,4 +1,4 @@
-Dune Client launcher 0.4.1  (commit 9552bb1819b1bf5c0eb7bab372c037c1403cf378)
+Dune Client launcher 0.5.3  (commit 314ee1c5748f516bb503f08e203cfd8467863899)
 ===========================================================
 
 This program is a modified version of the Horizon launcher
@@ -8,7 +8,7 @@ licensed under the GNU Lesser General Public License, version 3 or (at your opti
 third_party_licenses/). Our changes are described in NOTICE-DUNE.md.
 
 WRITTEN OFFER. Dune Development will give any person who received a copy of this program the complete
-corresponding source code of the exact version they received (this archive: dune-launcher-rs-0.4.1-source.tar.gz), together with the
+corresponding source code of the exact version they received (this archive: dune-launcher-rs-0.5.3-source.tar.gz), together with the
 scripts to build and install it, for at least three years from the day of distribution and for as long as we
 distribute that version, at no charge beyond the cost of delivery. Ask at https://duneclient.com (contact
 page) naming the version and commit above.

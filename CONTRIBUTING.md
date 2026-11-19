@@ -218,3 +218,31 @@ new pushes, we add it again.
 for bugs. To take something on, `/claim` its issue ([above](#claim-before-you-start)).
 
 How Horizon is run, and how people join the Team or lead a group: [GOVERNANCE.md](GOVERNANCE.md).
+
+---
+
+# Flujo Dune (DuneDevTech)
+
+Lo anterior viene del proyecto Horizon (upstream). Para el trabajo del equipo Dune rige esto:
+
+## Ramas
+- `dev` es la rama de integracion; `main` es lo que se publica.
+- Trabaja en `feat/<tema>` o `fix/<tema>` salidas de `dev` y abre PR hacia `dev`.
+- `dev` -> `main` solo mediante PR de release aprobado por @CrisAlvar3z.
+- **Nunca** hagas push directo a `dev` ni a `main`. (El plan gratuito de GitHub no puede bloquearlo: es una norma de equipo.)
+
+## Antes de abrir el PR
+1. TDD para la logica del core: escribe la prueba, mira que **falle**, escribe el minimo codigo para que pase, refactoriza.
+2. Todo bug corregido lleva un **test de regresion** que falla sin el arreglo.
+3. Cambios de UI: **tests con captura de pantalla** y adjunta las capturas al PR.
+4. Ejecuta los tests en local (ver `docs/TESTING.md`).
+5. Rellena la plantilla del PR.
+
+## Reglas de merge (convencion)
+- PR + **CI en verde** + **al menos 1 review** (CODEOWNERS pide a @CrisAlvar3z por defecto).
+- Sin CI verde o sin review no se fusiona, aunque GitHub lo permita.
+- Mensajes de commit: `feat: ...`, `fix: ...`, `chore: ...`, `docs: ...`.
+
+## Seguridad
+- Nunca subas secretos (gitleaks corre en cada PR). Si se cuela uno, **rota la clave** y avisa; borrar el commit no basta.
+- La CI no tiene secretos de produccion; no los pongas en workflows.

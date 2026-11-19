@@ -47,7 +47,7 @@ Changed upstream files (summary; the diff against upstream is the complete list)
   built-in upstream endpoint; `crates/horizon-addresses`: about URL.
 - `packaging/`: Dune icons and AppImage / desktop entry; `brand/`: Dune Client logos (not LGPL:
   `brand/LICENSE-BRAND.txt`).
-- `launcher/Cargo.toml`: feature `dev-offline` (QA only, never in a published build).
+- `launcher/Cargo.toml`: the `dev-offline` feature was removed (0.5.3); no account-free play exists. `handoff` re-verifies ownership with the Minecraft services (`account::verify_handed_off`).
 
 ## Antes de distribuir (obligaciones LGPL-3.0, resumen)
 

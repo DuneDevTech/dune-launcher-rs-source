@@ -57,9 +57,11 @@ impl Kind {
     }
 
     /// Its metadata service (Fabric's and Quilt's).
-    fn meta(self) -> &'static str {
+    fn meta(self, minecraft: &str) -> &'static str {
         match self {
             Kind::Quilt => "https://meta.quiltmc.org/v3",
+            // Minecraft 1.8-1.12 runs on Legacy Fabric (same API shape, own service and maven).
+            Kind::Fabric if crate::dune::is_legacy_fabric(minecraft) => "https://meta.legacyfabric.net/v2",
             _ => "https://meta.fabricmc.net/v2",
         }
     }
@@ -132,7 +134,7 @@ pub fn versions(kind: Kind, minecraft: &str, fetch: Fetch) -> Result<Vec<Listed>
     let listed = match kind {
         Kind::Forge | Kind::NeoForge => forge::versions(kind, minecraft, fetch)?,
         _ => {
-            let body = fetch(&format!("{}/versions/loader/{minecraft}", kind.meta()))?;
+            let body = fetch(&format!("{}/versions/loader/{minecraft}", kind.meta(minecraft)))?;
             parse_versions(&String::from_utf8_lossy(&body))?
         }
     };
@@ -216,7 +218,7 @@ pub fn install(
     let name = loader.kind.name();
     let url = format!(
         "{}/versions/loader/{minecraft}/{}/profile/json",
-        loader.kind.meta(),
+        loader.kind.meta(minecraft),
         loader.version
     );
     let mut profile: Value =
@@ -243,21 +245,28 @@ pub fn install(
         let path = maven_path(library["name"].as_str().ok_or("A library has no name")?)?;
         let repository = library["url"]
             .as_str()
-            .unwrap_or("https://repo1.maven.org/maven2/");
+            .unwrap_or("https://repo1.maven.org/maven2/")
+            .to_string();
         let url = format!("{}/{path}", repository.trim_end_matches('/'));
-        let sha1 = match library["sha1"].as_str() {
-            Some(sha1) => sha1.to_string(),
-            None => String::from_utf8_lossy(&fetch(&format!("{url}.sha1"))?)
-                .split_whitespace()
-                .next()
-                .unwrap_or_default()
-                .to_string(),
-        };
-        let file = dir.join("libraries").join(crate::mojang::relative(&path)?);
-        if sha1_file(&file).as_ref() != Some(&sha1) {
-            let body = fetch_checked(fetch, &url, &sha1).map_err(|e| format!("{url} {e}"))?;
-            write_file(&file, &body)?;
+        let coordinates = library["name"].as_str().ok_or("A library has no name")?.to_string();
+        // Old LWJGL 2 libraries (Legacy Fabric's lwjgl-platform) have no jar of their own: only a classifier per system,
+        // named by their `natives` map. Those are listed under `downloads.classifiers` (what the Mojang version files do),
+        // and only this system's is fetched now.
+        if let Some(natives) = library["natives"].as_object().cloned() {
+            let mut classifiers = serde_json::Map::new();
+            for (os, key) in &natives {
+                let Some(key) = key.as_str() else { continue };
+                let key = key.replace("${arch}", if cfg!(target_pointer_width = "64") { "64" } else { "32" });
+                let cpath = maven_path(&format!("{coordinates}:{key}"))?;
+                let curl = format!("{}/{cpath}", repository.trim_end_matches('/'));
+                let sha1 = fetch_library(dir, fetch, &curl, &cpath, None, os == crate::java_launch::os_name())?;
+                classifiers.insert(key, json!({"path": cpath, "url": curl, "sha1": sha1}));
+            }
+            library["downloads"] = json!({ "classifiers": classifiers });
+            continue;
         }
+        let published = library["sha1"].as_str().map(str::to_string);
+        let sha1 = fetch_library(dir, fetch, &url, &path, published, true)?;
         library["downloads"] = json!({"artifact": {"path": path, "url": url, "sha1": sha1}});
     }
     let out = dir
@@ -269,6 +278,47 @@ pub fn install(
         &serde_json::to_vec_pretty(&profile).map_err(|e| e.to_string())?,
     )?;
     Ok(id)
+}
+
+/// Puts one library jar under `dir/libraries` and returns its SHA-1: the one the profile or the repository's `.sha1` gives
+/// (checked against the bytes), or, when the repository publishes no `.sha1` for it, the SHA-1 of what was downloaded.
+/// `download` false only records the checksum (a system we are not on).
+fn fetch_library(
+    dir: &Path,
+    fetch: Fetch,
+    url: &str,
+    path: &str,
+    published: Option<String>,
+    download: bool,
+) -> Result<String, String> {
+    let file = dir.join("libraries").join(crate::mojang::relative(path)?);
+    let published = published.or_else(|| {
+        fetch(&format!("{url}.sha1")).ok().and_then(|b| {
+            String::from_utf8_lossy(&b)
+                .split_whitespace()
+                .next()
+                .filter(|h| h.len() == 40 && h.bytes().all(|c| c.is_ascii_hexdigit()))
+                .map(str::to_string)
+        })
+    });
+    match published {
+        Some(sha1) => {
+            if download && sha1_file(&file).as_ref() != Some(&sha1) {
+                let body = fetch_checked(fetch, url, &sha1).map_err(|e| format!("{url} {e}"))?;
+                write_file(&file, &body)?;
+            }
+            Ok(sha1)
+        }
+        None => match sha1_file(&file) {
+            Some(have) => Ok(have),
+            None if !download => Err(format!("{url}: no checksum is published")),
+            None => {
+                let body = fetch(url).map_err(|e| format!("{url} {e}"))?;
+                write_file(&file, &body)?;
+                sha1_file(&file).ok_or_else(|| format!("{url}: could not hash the download"))
+            }
+        },
+    }
 }
 
 #[cfg(test)]

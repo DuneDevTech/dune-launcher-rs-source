@@ -10,6 +10,10 @@ pub const FLAG: &str = "--developer-single-player";
 pub const NOTICE: &str = "Offline developer session: single-player only; no account features.";
 
 pub fn enabled(tag: &str) -> bool {
+    // Dune Client: no account-free play in any distributed build. Only unit tests exercise this (Horizon's own game, hidden here).
+    if !cfg!(test) {
+        return false;
+    }
     if std::env::var_os(ENV).as_deref() != Some(std::ffi::OsStr::new("1")) {
         return false;
     }

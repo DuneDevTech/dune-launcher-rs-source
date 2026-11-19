@@ -26,7 +26,7 @@ self-update, no built-in telemetry endpoint, no third-party sponsor banner, rebr
     cd launcher
     # Debian/Ubuntu without -dev packages: RUST_FONTCONFIG_DLOPEN=on and a LIBRARY_PATH dir
     # with libxkbcommon.so / libxkbcommon-x11.so symlinks (see EVALUACION.md).
-    nice cargo build --release -j2           # add --features dev-offline for QA builds only
+    nice cargo build --release -j2           # no QA-only features exist
 
 ## Microsoft login
 
@@ -34,11 +34,11 @@ Set the Azure public client id with `HORIZON_MSA_CLIENT_ID` (run time) or at bui
 `HORIZON_MSA_CLIENT_ID=2f1eb485-c280-475c-9448-83fbeb91870c cargo build --release`.
 Mojang must approve the app id (same gate as the Electron launcher, docs/MICROSOFT-LOGIN.md there).
 
-## Dev/QA offline session
+## No offline / developer session
 
-Builds made with `--features dev-offline` (or debug builds) honour `DUNE_DEV_OFFLINE=1` (offline
-name `DUNE_DEV_NAME`, default `DuneDev`, no Microsoft account). Published release builds are made
-**without** the feature and ignore the variable.
+Removed in 0.5.3 (Mojang AppID compliance). No build — release or debug — can start Minecraft without a
+Microsoft account that owns the game: `DUNE_DEV_OFFLINE`, `DUNE_DEV_NAME` and the `dev-offline` feature no longer exist,
+and `handoff` re-verifies the token and ownership against the Minecraft services before any launch.
 
 ## Upstream
 

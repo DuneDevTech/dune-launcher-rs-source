@@ -6,6 +6,16 @@ Every command of `horizon-launcher`, and the tool `horizon-launcher mcp` offers 
 
 With No AI on, `mcp` and `agent-config` are hidden and refuse; every other command stays. See [agent-control.md](agent-control.md#no-ai).
 
+## `horizon-launcher handoff`
+
+Dune Client (Electron launcher) hand-off: play one prepared instance. The JSON spec, with the account session, is read from stdin; `--info` prints what this binary supports.
+
+    horizon-launcher handoff
+
+- `--info`
+
+MCP: `handoff`.
+
 ## `horizon-launcher completions`
 
 Write a shell completion script to stdout.

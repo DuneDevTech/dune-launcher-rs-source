@@ -34,6 +34,7 @@ pub(super) fn run() {
 }
 
 fn run_launcher() {
+    horizon_launcher::launch_trace::mark("process-start (exe loaded, before any work)");
     horizon_platform::mod_package::holder::retain_capability();
     if let Some(code) = native_mods::internals_rustc_wrapper() {
         std::process::exit(code);
@@ -61,6 +62,7 @@ fn run_launcher() {
     // folders and records the error, which Settings shows with Retry and Use the default folder.
     // It keeps the migration lease for the life of the process.
     let _location_error = horizon_launcher::data_location::startup();
+    horizon_launcher::launch_trace::mark("data-location ready");
     perf::process_started();
     backend::exe_path();
     if let Some(code) = horizon_launcher::update_handoff::run() {
@@ -71,7 +73,9 @@ fn run_launcher() {
     backend::cleanup_launcher_updates();
     // What the launcher downloads goes through the player's proxy, if they set one: the parts
     // that build their own agents (`horizon-port-pack`) are told before anything starts.
+    horizon_launcher::launch_trace::mark("updates cleaned");
     horizon_launcher::proxy::announce(horizon_launcher::backend::Settings::load().proxy);
+    horizon_launcher::launch_trace::mark("settings loaded, entering cli");
     // The setup wizard and `horizon-launcher.exe uninstall` (what Control Panel runs) are windows,
     // not CLI commands: asked of the CLI parser first, `uninstall` was refused as an unknown
     // subcommand, with the error going to the console that Control Panel's start doesn't have.
